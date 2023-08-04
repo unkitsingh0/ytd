@@ -58,10 +58,13 @@ let handelTelegramBot = async () => {
     let userName = message.chat.username; //Username of telegram user who is using bot
     let response = await sybot(message.text);
     response.map(async (item) => {
-      let { data } = await axios.post(`http://localhost:8013/api/shortid/tg`, {
-        user: userName,
-        url: item.url,
-      }); //This will genarate short likn for big link of download link
+      let { data } = await axios.post(
+        `https://linkshortner-pjcs.onrender.com/api/shortid/tg`,
+        {
+          user: userName,
+          url: item.url,
+        }
+      ); //This will genarate short likn for big link of download link
       let shortURl = data;
       bot.sendMessage(
         //This will send the link to the user
