@@ -54,6 +54,10 @@ let handelTelegramBot = async () => {
 
   bot.on("message", async (message) => {
     let chat_id = message.from.id;
+    console.log(message.text);
+    if (message.text == "/start") {
+      return bot.sendMessage(chat_id, "Welcome send your link any time ");
+    }
     bot.sendMessage(chat_id, `Generating link`);
     let userName = message.chat.username; //Username of telegram user who is using bot
     let response = await sybot(message.text);
