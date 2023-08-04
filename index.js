@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+require("dotenv").config();
 const youtubeVideoRoute = require("./routes/youtubeVideoRoute");
 const pingRoute = require("./routes/pingRoute");
 const PORT = process.env.PORT || 8025;
