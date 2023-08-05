@@ -30,21 +30,25 @@ let handelYoutubeVideoLink = async (req, res) => {
 //Telegram bot code
 
 let sybot = async (url) => {
-  let video = await ytdl.getInfo(url);
-  let title = video.videoDetails.title; // getting video title
+  try {
+    let video = await ytdl.getInfo(url);
+    let title = video.videoDetails.title; // getting video title
 
-  let data = [];
-  video.formats.map((item) => {
-    if (item.hasAudio) {
-      if (item.container == "mp4")
-        data.push({
-          quality: item.qualityLabel,
-          url: item.url,
-          title,
-        });
-    }
-  });
-  return data;
+    let data = [];
+    video.formats.map((item) => {
+      if (item.hasAudio) {
+        if (item.container == "mp4")
+          data.push({
+            quality: item.qualityLabel,
+            url: item.url,
+            title,
+          });
+      }
+    });
+    return data;
+  } catch (error) {
+    return "something went wrong";
+  }
 };
 
 let handelTelegramBot = async () => {
@@ -53,32 +57,42 @@ let handelTelegramBot = async () => {
   let bot = new telegram(token, { polling: true });
 
   bot.on("message", async (message) => {
-    let chat_id = message.from.id;
-    console.log(message.text);
-    if (message.text == "/start") {
-      return bot.sendMessage(chat_id, "Welcome send your link any time ");
-    }
-    bot.sendMessage(chat_id, `Generating link`);
-    let userName = message.chat.username; //Username of telegram user who is using bot
-    let response = await sybot(message.text);
-    response.map(async (item) => {
-      let { data } = await axios.post(
-        `https://linkshortner-pjcs.onrender.com/api/shortid/tg`,
-        {
-          user: userName,
-          url: item.url,
-        }
-      ); //This will genarate short likn for big link of download link
-      let shortURl = data;
-      bot.sendMessage(
-        //This will send the link to the user
-        chat_id,
-        `${item.quality ? item.quality : "audio"}:${shortURl}`
-      );
-    });
-    //sending response to bot user
+    try {
+      let chat_id = message.from.id;
 
-    console.log("Bot is active");
+      if (message.text == "/start") {
+        return bot.sendMessage(chat_id, "Welcome send your link any time ");
+      }
+      bot.sendMessage(chat_id, `Generating link`);
+      let userName = message.chat.username; //Username of telegram user who is using bot
+      let response = await sybot(message.text);
+      if (response == "something went wrong")
+        return bot.sendMessage(chat_id, "Plase enter valide link");
+      response.map(async (item) => {
+        let { data } = await axios.post(
+          `https://linkshortner-pjcs.onrender.com/api/shortid/tg`,
+          {
+            user: userName,
+            url: item.url,
+          }
+        ); //This will genarate short likn for big link of download link
+        let shortURl = data;
+        bot.sendMessage(
+          //This will send the link to the user
+          chat_id,
+          `${item.quality ? item.quality : "audio"}:${shortURl}`
+        );
+      });
+      //sending response to bot user
+    } catch (error) {
+      console.log(error.message);
+      bot.sendMessage(
+        chat_id,
+        "Something went wrong plase try again after some time"
+      );
+      res.send("Something went wrong");
+    }
+    // console.log("Bot is active");
   });
 };
 
