@@ -22,7 +22,6 @@ let handelYoutubeVideoLink = async (req, res) => {
     });
     res.send(data);
   } catch (error) {
-    console.log(error.message);
     res.send(error.message);
   }
 };
